@@ -5629,3 +5629,18 @@ func doInit(t *initTask) {
 		t.state = 2 // initialization done
 	}
 }
+
+func Goid() int64 {
+	_g_ := getg()
+	return _g_.goid
+}
+
+func Mid() int64 {
+	_g_ := getg()
+	return _g_.m.id
+}
+
+func ProcId() int32 {
+	_g_ := getg()
+	return _g_.m.p.ptr().id
+}
