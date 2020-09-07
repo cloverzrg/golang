@@ -1777,6 +1777,7 @@ var newmHandoff struct {
 // id is optional pre-allocated m ID. Omit by passing -1.
 //go:nowritebarrierrec
 func newm(fn func(), _p_ *p, id int64) {
+	println("newm")
 	mp := allocm(_p_, fn, id)
 	mp.nextp.set(_p_)
 	mp.sigmask = initSigmask
@@ -3539,6 +3540,7 @@ func newproc(siz int32, fn *funcval) {
 			wakep()
 		}
 	})
+	println("newproc:Create a new g, id:", gp.goid, ", fn:", fn.fn)
 }
 
 // Create a new g in state _Grunnable, starting at fn, with narg bytes
@@ -4317,6 +4319,7 @@ func (pp *p) destroy() {
 // the write barrier code.
 // Returns list of Ps with local work, they need to be scheduled by the caller.
 func procresize(nprocs int32) *p {
+	println("procresize:create new processor")
 	old := gomaxprocs
 	if old < 0 || nprocs <= 0 {
 		throw("procresize: invalid arg")
@@ -5642,5 +5645,43 @@ func Mid() int64 {
 
 func ProcId() int32 {
 	_g_ := getg()
-	return _g_.m.p.ptr().id
+	p := _g_.m.p.ptr()
+	return p.id
+}
+
+func GetG() *g {
+	return getg()
+}
+
+func GetP() *p {
+	return getg().m.p.ptr()
+}
+
+func GetM() *m {
+	return getg().m
+}
+
+func GetGPtr() uintptr {
+	return uintptr(unsafe.Pointer(getg()))
+}
+
+func GetPPtr() uintptr {
+	return uintptr(getg().m.p)
+}
+
+func GetMPtr() uintptr {
+	return uintptr(unsafe.Pointer(getg().m))
+}
+
+func GetRunq() (int32, []uintptr) {
+	runq := GetP().runq
+	runqq := make([]uintptr, 256)
+	for i := 0; i < 256; i++ {
+		runqq[i] = uintptr(runq[i])
+	}
+	return GetP().id, runqq
+}
+
+func GetSchedt() schedt {
+	return sched
 }
